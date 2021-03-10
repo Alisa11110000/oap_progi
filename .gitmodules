@@ -1,3 +1,6 @@
 [submodule "Абрамов_Михаил_подмодуль"]
 	path = Абрамов_Михаил_подмодуль
 	url = https://github.com/God-Emperor-of-Mankind/ImperiumOfMankind
+[submodule "Серебрянников_Олег_подмодуль"]
+	path = Серебрянников_Олег_подмодуль
+	url = https://github.com/StudLabs/OAP_tell_about
