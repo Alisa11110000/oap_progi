@@ -4,3 +4,6 @@
 [submodule "Серебрянников_Олег_подмодуль"]
 	path = Серебрянников_Олег_подмодуль
 	url = https://github.com/StudLabs/OAP_tell_about
+[submodule "Перемыщев_Глеб_подмодуль"]
+	path = Перемыщев_Глеб_подмодуль
+	url = https://github.com/qXOMAp/OAP
