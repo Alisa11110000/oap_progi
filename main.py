@@ -1,10 +1,22 @@
 import numpy as np
+import sys
 
-K_vsp = []
+f = open
 
-def kolvo_elementov_i_gestkost_kagdogo_elementa(name):
 
-    K_vsp = []
+def kolvo_elementov_i_gestkost_kagdogo_elementa(e):
+    K_gestk_elem = []
+    for i in range(e):
+        ef = int(input("Введите значение жёсткости элемента (начения могут быть только натуральными числами): ef = "))
+        K_gestk_elem.append(ef)
+    print('Матрица жесткостей элементов: ')
+    print(K_gestk_elem)
+    return K_gestk_elem
+
+
+def vspom_matriza_sobiraet_gestkosti_vseh_elem(e):
+
+    K_vsp_EF = []
     for k in range(e):
         K_vsp_1 = []
         ef = int(input("Введите значение жёсткости элемента (начения могут быть только натуральными числами): ef = "))
@@ -21,13 +33,18 @@ def kolvo_elementov_i_gestkost_kagdogo_elementa(name):
                     K_EF_e[i].append(-ef)
                 K_vsp_2.append(K_EF_e[i][j])
             K_vsp_1.append(K_vsp_2)
-        K_vsp.append(K_vsp_1)
+        K_vsp_EF.append(K_vsp_1)
         for i in range(r):
             for j in range(c):
                 print(K_EF_e[i][j], end=" ")
             print()
     print('Вспомогательная матрица: ')
-    print(K_vsp)
+    print(K_vsp_EF)
+    return K_vsp_EF
+
+def globalnaya_matrica_gestkosti(e):
+
+    K_vsp = vspom_matriza_sobiraet_gestkosti_vseh_elem(e)
     print('Глобальная матрица: ')
     K_EF = []
     for i in range(e+1):
@@ -60,18 +77,19 @@ def kolvo_elementov_i_gestkost_kagdogo_elementa(name):
     K_EF[-1][-1] = 1
     print(K_EF)
     K_EF_obr = np.linalg.inv(K_EF)
+    print('Матрица, обратная глобальной матрице жёсткости:')
     print(K_EF_obr)
     return K_EF_obr
 
 
-def dliny_elementov(name):
+def dliny_elementov(e):
     L = []
     for i in range(e):
         L.append(int(input('Введите значение длины i-ого элемента: ')))
     print(L)
     return L
 
-def silovaya_nagryzka(name):
+def silovaya_nagryzka(e, f, q, N_e, n_e, n_e_k):
 
     r = e+1
     c = 1
@@ -79,7 +97,7 @@ def silovaya_nagryzka(name):
     for i in range(r):
         F_s.append([])
         for j in range(c):
-            if (i) == (N_e-1):
+            if i == N_e-1:
                 F_s[i].append(f)
             else:
                 F_s[i].append(0)
@@ -91,7 +109,7 @@ def silovaya_nagryzka(name):
     for i in range(r):
         Q_s.append([])
         for j in range(c):
-            if ((i) >= (n_e - 1)) and ((i) <= (n_e_k)) and (n_e != n_e_k):
+            if (i >= n_e - 1) and (i <= n_e_k) and (n_e != n_e_k):
                 Q_s[i].append(q)
             elif ((i) >= (n_e - 1)) and ((i) <= (n_e_k)) and (n_e == n_e_k):
                 Q_s[i].append(q)
@@ -110,7 +128,7 @@ def silovaya_nagryzka(name):
     return F
 
 
-def silovsya_raspredel_nagryzka(name):
+def silovsya_raspredel_nagryzka(e):
     r = e + 1
     c = 1
     Q_s = []
@@ -128,77 +146,95 @@ def silovsya_raspredel_nagryzka(name):
     return Q_s
 
 
-def peremecheniya(name):
-    Glob = kolvo_elementov_i_gestkost_kagdogo_elementa(name)
-    F = silovaya_nagryzka(name)
+def peremecheniya(e, f, q, N_e, n_e, n_e_k):
+    Glob = globalnaya_matrica_gestkosti(e)
+    F = silovaya_nagryzka(e, f, q, N_e, n_e, n_e_k)
     U = Glob.dot(F)
-    print('Суммарный вектор перемещений')
-    print(U)
     return U
 
-
-
-def funk_form(name):
-    l = 1
-    N = []
-    for i in range(e+1):
-        N.append([])
-    for i in range(e+1):
-        N[i] = []
-    for i in range(e+1):
-        N1 = 1 - x/l
-        N2 = x/l
-        N[i].append(N1)
-        N[i].apeend(N2)
-    print(N)
-    return N
-
-
 def scalar(a,b):
+    """Скалярное произведение"""
     return a[0]*b[0]+a[1]*b[1]
 
+def peremech_elem_x(e, U, num_el, x, l=1):
+    """Перемещение в координате x элемента с номером num_el"""
+    # проверка на входные данные
+    # номер элемента не должен быть меньше 1 и больше количетсва элементов
+    if num_el < 1 or num_el > e:
+        print("Неверный номер номер элемента")
+        exit(1) # Выходим с ошибкой
+    N1 = 1 - x / l
+    N2 = x / l
+    N = [N1, N2]
 
-def approximation(x,u_e,l):
-    N_1 = 1 - x / l
-    N_2 = x / l
-    N = [N_1, N_2]
-    return scalar(N,u_e)
+    # Получаем перемещения с крайних узлов элемента
+    # Левый узел
+    u1 = U[num_el-1]
+    # Правый узел
+    u2 = U[num_el]
+    u = [u1, u2]
+    # Значение перемещение в координате x
+    return scalar(N, u)
 
 
-def peremech_elem(x,u,l):
-    u_e = []
-    for i in range(e+1):
-        u_e.append([])
-        u_e[i].append(U[i])
-    print('x=0',approximation(0,u_e,1))
-    print('x=0.25', approximation(0.25, u_e, 1))
-    print('x=0.5', approximation(0.5, u_e, 1))
-    print('x=0.75', approximation(0.75, u_e, 1))
-    print('x=1', approximation(1, u_e, 1))
+def peremech_elem(e, U, num_el, l=1):
+    print("Элемент №", num_el)
+    for i in range(5):
+        # Получаем координату
+        coord = 0.25*i*l
+        # Находим перемещение в координате
+        u = peremech_elem_x(e, U, num_el, coord, l=l)
+        print(f'x={0.25*i:4.2f} u={u:6.3f}')
 
 
-def vnut_ysil(name):
-    N1_proiz = -1/l
-    N2_proiz = 1/l
-    N_proiz = [N1_proiz,N2_proiz]
-    N_e = (N_proiz[0]*u_e[0]+N_proiz[1]*u_e[1])*K_EF_e
-    print(N_e)
+def vnut_usil(e, U, num_el, l=1):
+    if num_el < 1 or num_el > e:
+        print("Неверный номер номер элемента")
+        exit(1)  # Выходим с ошибкой
+    EF_K = kolvo_elementov_i_gestkost_kagdogo_elementa(e)
+    N1_proiz = - 1 / l
+    N2_proiz = 1 / l
+    N_proiz = [N1_proiz, N2_proiz]
+    u1 = U[num_el - 1]
+    u2 = U[num_el]
+    u = [u1, u2]
+    return scalar(N_proiz, u)*EF_K[num_el]
 
+
+def vnut_ysiliya(e, U, num_el):
+    print("Элемент №", num_el)
+    N_elem = vnut_usil(e, U, num_el, l=1)
+    print(f'N_elem={N_elem:6.3f}')
 
 
 if __name__ == '__main__':
     e = int(input("Введите число конечных элементов: е = "))
-    f = int(input("Введите значение сосредоточенной силовой нагрузки: f = "))
+    f = float(input("Введите значение сосредоточенной силовой нагрузки: f = "))
     N_e = int(input("Введите номер элемента, к которому приложена нагрузка: N(е) = "))
-    q = int(input("Введите значение распределённой силовой нагрузки: q = "))
+    q = float(input("Введите значение распределённой силовой нагрузки: q = "))
     l = int(input(
         "Введите значение длины, на которой приложена нагрузка. Число должно быть целым! Длина каждого элемента здесь равна 1: l = "))
     n_e = int(input("Введите номер элемента, содержащий начальную точку приложения : n_e = "))
     n_e_k = int(input("Введите номер элемента, содержащий конечную точку приложения : n_e_k = "))
-    kolvo_elementov_i_gestkost_kagdogo_elementa('A')
-    dliny_elementov('A')
-    silovaya_nagryzka('A')
-    silovsya_raspredel_nagryzka('A')
-    peremecheniya('A')
-    funk_form('A')
-    vnut_ysil('A')
+    kolvo_elementov_i_gestkost_kagdogo_elementa(e)
+    vspom_matriza_sobiraet_gestkosti_vseh_elem(e)
+    globalnaya_matrica_gestkosti(e)
+    dliny_elementov(e)
+    silovaya_nagryzka(e, f, q, N_e, n_e, n_e_k)
+    # silovsya_raspredel_nagryzka(e)
+    U = peremecheniya(e, f, q, N_e, n_e, n_e_k)
+    # приведём к массиву
+    U = [x[0] for x in U]
+    print('Суммарный вектор перемещений')
+    print(U)
+
+    # Выводим апроксимации для всех элементов
+    for num_el in range(1, e+1):
+        # визуальный разграничитель для апроксимаций
+        print('-'*30)
+        peremech_elem(e, U, num_el, l=1)
+
+    for num_el in range(1, e+1):
+        print('Усилия в элементах:')
+        print('-' * 30)
+        vnut_ysiliya(e, U, num_el)
