@@ -187,7 +187,7 @@ def peremech_elem(e, U, num_el, l=1):
         print(f'x={0.25*i:4.2f} u={u:6.3f}')
 
 
-def vnut_usil(e, U, num_el, l=1):
+def vnut_usil(e, U, num_el, x, l=1):
     if num_el < 1 or num_el > e:
         print("Неверный номер номер элемента")
         exit(1)  # Выходим с ошибкой
@@ -198,13 +198,17 @@ def vnut_usil(e, U, num_el, l=1):
     u1 = U[num_el - 1]
     u2 = U[num_el]
     u = [u1, u2]
-    return scalar(N_proiz, u)*EF_K[num_el]
+    return scalar(N_proiz, u)*EF_K[num_el-1]
 
 
-def vnut_ysiliya(e, U, num_el):
+def vnut_ysiliya(e, U, num_el, l=1):
     print("Элемент №", num_el)
-    N_elem = vnut_usil(e, U, num_el, l=1)
-    print(f'N_elem={N_elem:6.3f}')
+    for i in range(5):
+        # Получаем координату
+        coord = 0.25 * i * l
+        # Находим усилие в координате
+        N_elem = vnut_usil(e, U, num_el, coord, l=1)
+        print(f'x={0.25 * i:4.2f} N_elem={N_elem:6.3f}')
 
 
 if __name__ == '__main__':
@@ -237,4 +241,4 @@ if __name__ == '__main__':
     for num_el in range(1, e+1):
         print('Усилия в элементах:')
         print('-' * 30)
-        vnut_ysiliya(e, U, num_el)
+        vnut_ysiliya(e, U, num_el, l)
