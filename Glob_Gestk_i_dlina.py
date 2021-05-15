@@ -6,7 +6,7 @@ from vvodniye_dlya_gestkosty import kolvo_elementov_i_gestkost_kagdogo_elementa
 
 def Glob_matrica(e):
     K_vsp = kolvo_elementov_i_gestkost_kagdogo_elementa(e)
-    print('Глобальная матрица: ')
+    print('Глобальная матрица жёсткости: ')
     K_EF = []
     for i in range(e + 1):
         K_EF.append([])

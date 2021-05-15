@@ -225,8 +225,8 @@ if __name__ == '__main__':
     globalnaya_matrica_gestkosti(e)
     dliny_elementov(e)
     silovaya_nagryzka(e, f, q, N_e, n_e, n_e_k)
-    # silovsya_raspredel_nagryzka(e)
     U = peremecheniya(e, f, q, N_e, n_e, n_e_k)
+    print(U)
     # приведём к массиву
     U = [x[0] for x in U]
     print('Суммарный вектор перемещений')
@@ -239,6 +239,6 @@ if __name__ == '__main__':
         peremech_elem(e, U, num_el, l=1)
 
     for num_el in range(1, e+1):
-        print('Усилия в элементах:')
+        print('Усилия в элементе:')
         print('-' * 30)
         vnut_ysiliya(e, U, num_el, l)
